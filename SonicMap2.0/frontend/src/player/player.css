@@ -1,0 +1,516 @@
+/* ── Phase 7: persistent Spotify player ─────────────────────────────────── */
+
+.app-shell.has-player .main-content {
+  padding-bottom: 132px;
+}
+
+.player-dock {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 248px;
+  z-index: 40;
+  padding: 0 18px 14px;
+  pointer-events: none;
+}
+
+.player-message {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 820px;
+  margin: 0 auto 8px;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(26, 22, 37, 0.96);
+  color: #ddd6fe;
+  font-size: 12.5px;
+  pointer-events: auto;
+  animation: player-rise 220ms ease-out;
+}
+
+.player-message.tone-warn {
+  border-color: rgba(251, 191, 36, 0.35);
+  color: #fde68a;
+}
+
+.player-message.tone-error {
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #fecaca;
+}
+
+.player-message button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.player-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
+  padding: 12px 18px;
+  border: 1px solid rgba(190, 169, 255, 0.16);
+  border-radius: 16px;
+  background: rgba(20, 17, 29, 0.88);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  pointer-events: auto;
+}
+
+.player-track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.player-art {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(236, 72, 153, 0.25));
+  color: #ede9fe;
+  font-size: 20px;
+  transition: box-shadow 300ms ease;
+}
+
+.player-art.is-playing {
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.5), 0 0 22px rgba(139, 92, 246, 0.35);
+}
+
+.player-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.player-track-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.player-track-text strong {
+  overflow: hidden;
+  color: #f4f1ff;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.player-track-text span {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.player-pill {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  border: 1px solid rgba(29, 185, 84, 0.45);
+  border-radius: 999px;
+  background: rgba(29, 185, 84, 0.12);
+  color: #86efac;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.player-pill:hover {
+  background: rgba(29, 185, 84, 0.22);
+  transform: translateY(-1px);
+}
+
+.player-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #c4b5fd;
+  font-size: 15px;
+  transition: color 150ms ease, background 150ms ease, transform 120ms ease;
+}
+
+.player-btn:hover:not(:disabled) {
+  background: rgba(167, 139, 250, 0.12);
+  color: #f4f1ff;
+}
+
+.player-btn:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.player-btn.small {
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
+}
+
+.player-btn.active {
+  color: #4ade80;
+}
+
+.player-btn.main {
+  width: 40px;
+  height: 40px;
+  background: #f4f1ff;
+  color: #14111d;
+  font-size: 13px;
+}
+
+.player-btn.main:hover:not(:disabled) {
+  background: #fff;
+  color: #14111d;
+  transform: scale(1.05);
+}
+
+.player-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.player-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 520px;
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.player-progress input {
+  flex: 1;
+}
+
+.player-bar input[type="range"] {
+  height: 4px;
+  margin: 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--purple) 0%,
+    var(--purple) var(--fill, 0%),
+    rgba(190, 169, 255, 0.18) var(--fill, 0%)
+  );
+  appearance: none;
+  cursor: pointer;
+}
+
+.player-bar input[type="range"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.player-bar input[type="range"]::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #f4f1ff;
+  appearance: none;
+  transition: transform 120ms ease;
+}
+
+.player-bar input[type="range"]:hover:not(:disabled)::-webkit-slider-thumb {
+  transform: scale(1.25);
+}
+
+.player-bar input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background: #f4f1ff;
+}
+
+.player-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.player-volume {
+  width: 96px;
+}
+
+.player-open {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: #a79abf;
+  font-size: 11.5px;
+  white-space: nowrap;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.player-open:hover {
+  border-color: rgba(29, 185, 84, 0.5);
+  color: #86efac;
+}
+
+/* Play buttons inside lists */
+.play-button {
+  color: #c4b5fd;
+  font-size: 11px;
+}
+
+.play-button.current {
+  border-color: rgba(167, 139, 250, 0.55);
+  background: rgba(139, 92, 246, 0.18);
+  color: #f4f1ff;
+}
+
+.play-button.unavailable {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.play-all-button {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.play-all-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cover-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.muted-tag {
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #94a3b8;
+}
+
+.inline-error {
+  margin: 10px 0 0;
+  color: #fca5a5;
+  font-size: 13px;
+}
+
+/* Discover for you (Phase 5 results) */
+.discover-for-you {
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.discover-for-you-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.discover-for-you-head h3 {
+  margin: 4px 0 0;
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.discover-for-you-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.chip-button {
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: #a79abf;
+  font-size: 12px;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.chip-button.selected,
+.chip-button:hover {
+  border-color: rgba(167, 139, 250, 0.5);
+  background: rgba(139, 92, 246, 0.14);
+  color: #f4f1ff;
+}
+
+.search-form.compact input {
+  width: 150px;
+}
+
+/* SonicMap Playlists (Phase 6) */
+.sonic-playlists-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.sonic-playlists-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 2fr);
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.sonic-playlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sonic-playlist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.sonic-playlist-item.selected {
+  border-color: rgba(167, 139, 250, 0.5);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.sonic-playlist-open {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  color: #f4f1ff;
+  text-align: left;
+}
+
+.sonic-playlist-open span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.sonic-playlist-detail .playlist-result-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sonic-playlist-detail .playlist-result-heading h3 {
+  margin: 0;
+}
+
+@keyframes player-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1100px) {
+  .player-bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .player-right {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .player-dock {
+    left: 0;
+    padding: 0 8px 8px;
+  }
+
+  .sonic-playlists-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .player-bar {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .player-pill {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .player-message {
+    animation: none;
+  }
+}
+
+/* My Music Map similarity rows had no layout rules (children stacked vertically).
+   Scoped to the rank-badge variant so the global recommendations list is untouched. */
+.recommendation-item:has(> .recommendation-rank) {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px 6px;
+  border-top: 1px solid rgba(190, 169, 255, 0.07);
+}
+
+.recommendation-item:has(> .recommendation-rank) .recommendation-rank {
+  width: 26px;
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.recommendation-item:has(> .recommendation-rank) .song-info {
+  flex: 1;
+  min-width: 0;
+}
